@@ -1,0 +1,32 @@
+{
+  "name": "dmca-transaction-router",
+  "version": "1.0.0",
+  "description": "A platform for optimizing blockchain transactions through multi-chain routing, integration of Layer-2 technologies, and built-in security modules.",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/romanchaa997/DMCA-transaction-router.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/romanchaa997/DMCA-transaction-router/issues"
+  },
+  "homepage": "https://github.com/romanchaa997/DMCA-transaction-router#readme",
+  "dependencies": {
+    "axios": "^1.8.1",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
+}
