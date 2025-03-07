@@ -17,16 +17,13 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '16'  # або ваша версія Node.js
+        node-version: '16'
 
     - name: Install dependencies
       run: npm install
-      
+
     - name: Set permissions for jest
       run: chmod +x ./node_modules/.bin/jest
-    
+
     - name: Run tests
       run: npm test
-
-    - name: Build project (if needed)
-      run: npm run build  # Якщо ви маєте скрипт build, наприклад, для збірки TypeScript-коду
