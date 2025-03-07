@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DMCA Transaction Router</title>
+</head>
+<body>
+  <h1>DMCA Transaction Router</h1>
+  <form id="transactionForm">
+    <label for="sender">Адреса відправника:</label>
+    <input type="text" id="sender" name="sender" required><br><br>
+    <label for="recipient">Адреса отримувача:</label>
+    <input type="text" id="recipient" name="recipient" required><br><br>
+    <label for="amount">Сума:</label>
+    <input type="number" id="amount" name="amount" step="any" required><br><br>
+    <label for="token">Токен:</label>
+    <input type="text" id="token" name="token" required><br><br>
+    <button type="submit">Відправити транзакцію</button>
+  </form>
+  
+  <h2>Результат маршрутизації</h2>
+  <pre id="result"></pre>
+  
+  <script>
+    document.getElementById('transactionForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const sender = document.getElementById('sender').value.trim();
+      const recipient = document.getElementById('recipient').value.trim();
+      const amount = parseFloat(document.getElementById('amount').value);
+      const token = document.getElementById('token').value.trim();
+      
+      // Базова валідація
+      if (!/^0x[a-fA-F0-9]{40}$/.test(sender)) {
+        document.getElementById('result').textContent = 'Помилка: Невірний формат адреси відправника.';
+        return;
+      }
+      if (!/^0x[a-fA-F0-9]{40}$/.test(recipient)) {
+        document.getElementById('result').textContent = 'Помилка: Невірний формат адреси отримувача.';
+        return;
+      }
+      if (isNaN(amount) || amount <= 0) {
+        document.getElementById('result').textContent = 'Помилка: Невірна сума (має бути число > 0).';
+        return;
+      }
+      if (!token) {
+        document.getElementById('result').textContent = 'Помилка: Поле "token" не може бути порожнім.';
+        return;
+      }
+      
+      const payload = { sender, recipient, amount, token };
+      
+      try {
+        const response = await fetch('/route', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        const data = await response.json();
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById('result').textContent = 'Помилка: ' + error;
+      }
+    });
+  </script>
+</body>
+</html>

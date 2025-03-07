@@ -1,26 +1,59 @@
 import express from 'express';
 import { routeTransaction, TransactionInput } from './transactionRouter';
+import { body, validationResult } from 'express-validator';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('DMCA Transaction Router MVP');
-});
+// app.get('/', (req, res) => {
+//   res.send('DMCA Transaction Router MVP');
+// });
 
-// Новий ендпоінт для маршрутизації транзакцій
-app.post('/route', async (req, res) => {
-  const input: TransactionInput = req.body;
-  try {
-    const result = await routeTransaction(input);
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ error: 'Помилка при маршрутизації транзакції' });
-  }
-});
+app.use(express.static('public'));
 
+app.post(
+    '/route',
+    [
+      // Валідація поля sender (Ethereum-адреса)
+      body('sender')
+        .exists().withMessage('Поле sender обов’язкове.')
+        .isString().withMessage('Поле sender має бути рядком.')
+        .matches(/^0x[a-fA-F0-9]{40}$/).withMessage('Невірний формат адреси відправника.'),
+      // Валідація поля recipient (Ethereum-адреса)
+      body('recipient')
+        .exists().withMessage('Поле recipient обов’язкове.')
+        .isString().withMessage('Поле recipient має бути рядком.')
+        .matches(/^0x[a-fA-F0-9]{40}$/).withMessage('Невірний формат адреси отримувача.'),
+      // Валідація поля amount
+      body('amount')
+        .exists().withMessage('Поле amount обов’язкове.')
+        .isFloat({ gt: 0 }).withMessage('Сума має бути числом > 0.'),
+      // Валідація поля token
+      body('token')
+        .exists().withMessage('Поле token обов’язкове.')
+        .isString().withMessage('Поле token має бути рядком.')
+        .notEmpty().withMessage('Поле token не може бути порожнім.')
+    ],
+    async (req, res) => {
+      // Перевірка результатів валідації
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+      
+      const input: TransactionInput = req.body;
+      try {
+        const result = await routeTransaction(input);
+        res.json(result);
+      } catch (error) {
+        console.error('Помилка маршрутизації транзакції:', error);
+        res.status(500).json({ error: 'Помилка при маршрутизації транзакції' });
+      }
+    }
+  );  
+  
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
