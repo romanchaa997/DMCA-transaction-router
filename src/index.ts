@@ -1,6 +1,7 @@
 import express from 'express';
 import { routeTransaction, TransactionInput } from './transactionRouter';
 import { body, validationResult } from 'express-validator';
+import logger from './logger';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -48,7 +49,7 @@ app.post(
         const result = await routeTransaction(input);
         res.json(result);
       } catch (error) {
-        console.error('Помилка маршрутизації транзакції:', error);
+        logger.error('Помилка маршрутизації транзакції:', error);
         res.status(500).json({ error: 'Помилка при маршрутизації транзакції' });
       }
     }
