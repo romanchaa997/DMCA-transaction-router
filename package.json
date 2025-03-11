@@ -1,37 +1,36 @@
 {
   "name": "dmca-transaction-router",
   "version": "1.0.0",
-  "description": "A platform for optimizing blockchain transactions through multi-chain routing, integration of Layer-2 technologies, and built-in security modules.",
-  "main": "index.js",
+  "description": "DMCA Transaction Router - TypeScript Project",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "test": "jest",
-    "build": "echo 'No build step needed'"
+    // Скрипт для компіляції TypeScript у JavaScript
+    "build": "tsc",
+
+    // Команда, яку Heroku викликає після встановлення залежностей
+    "heroku-postbuild": "npm run build",
+
+    // Запускає зкомпільований файл index.js з директорії dist
+    "start": "node dist/index.js",
+
+    // Юніт-тести (Jest)
+    "test": "jest"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/romanchaa997/DMCA-transaction-router.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/romanchaa997/DMCA-transaction-router/issues"
-  },
-  "homepage": "https://github.com/romanchaa997/DMCA-transaction-router#readme",
   "dependencies": {
-    "axios": "^1.8.1",
-    "express": "^4.21.2",
-    "express-validator": "^7.2.1",
-    "winston": "^3.17.0"
+    "express": "^4.18.2",
+    // Важливо: TypeScript і ts-node повинні бути у "dependencies", 
+    // якщо ви хочете мати можливість запускати їх на Heroku у продакшн-режимі
+    "typescript": "^4.9.5",
+    "ts-node": "^10.9.1",
+    // Інші залежності, потрібні для вашого додатку
+    "winston": "^3.8.2",
+    "express-validator": "^6.14.3"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
-    "@types/jest": "^29.5.14",
-    "@types/node": "^22.13.9",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.2.6",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    // Тести, лінтери та інші інструменти, які не потрібні у продакшн:
+    "jest": "^29.5.0",
+    "@types/jest": "^29.5.0",
+    "@types/express": "^4.17.17",
+    // ... інші dev-залежності
   }
 }

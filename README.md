@@ -1,7 +1,6 @@
 # DMCA-transaction-router
-A platform for optimizing blockchain transactions through multi-chain routing, integration of Layer-2 technologies, and built-in security modules.
+Decentralized Multi-Chain Accelerator - platform for optimizing blockchain transactions through multi-chain routing, integration of Layer-2 technologies, and built-in security modules.
 
-# DMCA-transaction-router
 
 **Description:**
 DMCA-transaction-router is a platform for optimizing transactions on blockchains using additional multi-lane routing, integration of Layer-2 technologies and providing additional security for automated audits.

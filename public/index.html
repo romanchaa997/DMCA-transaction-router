@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DMCA Transaction Router</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h1>DMCA Transaction Router</h1>
@@ -22,7 +23,49 @@
   <h2>Результат маршрутизації</h2>
   <pre id="result"></pre>
   
+  <h2>Історія транзакцій</h2>
+  <div id="history"></div>
+  
   <script>
+    // Функція збереження історії
+    function saveToHistory(payload, result) {
+      let history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
+      const record = {
+        timestamp: new Date().toLocaleString(),
+        payload,
+        result
+      };
+      history.unshift(record);
+      if (history.length > 10) {
+        history = history.slice(0, 10);
+      }
+      localStorage.setItem('transactionHistory', JSON.stringify(history));
+    }
+    
+    // Функція відображення історії
+    function displayHistory() {
+      const historyContainer = document.getElementById('history');
+      const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
+      if (history.length === 0) {
+        historyContainer.innerHTML = '<p>Історія порожня.</p>';
+        return;
+      }
+      let html = '<ul>';
+      history.forEach(record => {
+        html += `<li>
+          <strong>${record.timestamp}</strong><br>
+          <em>Запит:</em> ${JSON.stringify(record.payload)}<br>
+          <em>Відповідь:</em> ${JSON.stringify(record.result)}
+        </li>`;
+      });
+      html += '</ul>';
+      historyContainer.innerHTML = html;
+    }
+    
+    // При завантаженні сторінки відображаємо історію
+    window.addEventListener('load', displayHistory);
+    
+    // Обробник відправлення форми
     document.getElementById('transactionForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -60,6 +103,11 @@
         
         const data = await response.json();
         document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        
+        // Зберігаємо в історію
+        saveToHistory(payload, data);
+        // Оновлюємо відображення історії
+        displayHistory();
       } catch (error) {
         document.getElementById('result').textContent = 'Помилка: ' + error;
       }
