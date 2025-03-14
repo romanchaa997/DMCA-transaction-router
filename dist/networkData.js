@@ -8,38 +8,56 @@ const axios_1 = __importDefault(require("axios"));
 async function fetchNetworkData() {
     if (process.env.USE_REAL_API === 'true') {
         try {
-            const response = await axios_1.default.get('https://api.blockcypher.com/v1/eth/main');
-            const ethData = response.data; // Використовуємо any для спрощення типізації
+            const etherscanKey = process.env.ETHERSCAN_API_KEY || '';
+            // Запит до Etherscan Gas Oracle
+            const ethResponse = await axios_1.default.get(`https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${etherscanKey}`);
+            // Якщо запит успішний, отримуємо ProposeGasPrice (за потреби, можна додати додаткову обробку)
+            const gasFee = Number(ethResponse.data.result.ProposeGasPrice) || 100;
+            // Використовуємо орієнтовні значення для інших параметрів
+            const confirmationTime = 18;
+            const load = 80;
+            const averageBlockTime = 14;
+            const reliability = 98;
             const networkData = [
                 {
                     name: 'Ethereum',
-                    gasFee: ethData.high_fee_per_kb ? Number(ethData.high_fee_per_kb) : 100,
-                    confirmationTime: ethData.avg_confirm_time ? Number(ethData.avg_confirm_time) : 15,
-                    load: ethData.percent_full ? Number(ethData.percent_full) : 80
+                    gasFee,
+                    confirmationTime,
+                    load,
+                    averageBlockTime,
+                    reliability
                 },
                 {
                     name: 'Polygon',
-                    gasFee: 2,
+                    gasFee: 2.5,
                     confirmationTime: 2,
-                    load: 20
+                    load: 25,
+                    averageBlockTime: 2.5,
+                    reliability: 95
                 },
                 {
                     name: 'BSC',
-                    gasFee: 5,
+                    gasFee: 6,
                     confirmationTime: 3,
-                    load: 40
+                    load: 45,
+                    averageBlockTime: 3,
+                    reliability: 88
                 },
                 {
                     name: 'Avalanche',
-                    gasFee: 10,
-                    confirmationTime: 5,
-                    load: 50
+                    gasFee: 15,
+                    confirmationTime: 4,
+                    load: 55,
+                    averageBlockTime: 2,
+                    reliability: 93
                 },
                 {
                     name: 'Solana',
                     gasFee: 0.001,
                     confirmationTime: 1,
-                    load: 30
+                    load: 30,
+                    averageBlockTime: 0.5,
+                    reliability: 85
                 }
             ];
             return networkData;
@@ -48,13 +66,13 @@ async function fetchNetworkData() {
             console.error('Помилка отримання даних з API:', error);
         }
     }
-    // Якщо режим реального API не увімкнено або при помилці – повертаємо мок-дані
+    // Якщо режим реального API не увімкнено або виникла помилка – повертаємо мок-дані
     const mockData = [
-        { name: 'Ethereum', gasFee: 100, confirmationTime: 15, load: 80 },
-        { name: 'Polygon', gasFee: 2, confirmationTime: 2, load: 20 },
-        { name: 'BSC', gasFee: 5, confirmationTime: 3, load: 40 },
-        { name: 'Avalanche', gasFee: 10, confirmationTime: 5, load: 50 },
-        { name: 'Solana', gasFee: 0.001, confirmationTime: 1, load: 30 }
+        { name: 'Ethereum', gasFee: 100, confirmationTime: 15, load: 80, averageBlockTime: 14, reliability: 98 },
+        { name: 'Polygon', gasFee: 2, confirmationTime: 2, load: 20, averageBlockTime: 2.5, reliability: 95 },
+        { name: 'BSC', gasFee: 5, confirmationTime: 3, load: 40, averageBlockTime: 3, reliability: 88 },
+        { name: 'Avalanche', gasFee: 10, confirmationTime: 5, load: 50, averageBlockTime: 2, reliability: 93 },
+        { name: 'Solana', gasFee: 0.001, confirmationTime: 1, load: 30, averageBlockTime: 0.5, reliability: 85 }
     ];
     return mockData;
 }
