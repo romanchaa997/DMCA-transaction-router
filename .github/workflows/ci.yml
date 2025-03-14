@@ -24,6 +24,16 @@ jobs:
       # Крок 2.3: Встановлення залежностей
       - name: Install dependencies
         run: npm install
+      # Додатковий крок: встановити права на виконання для jest
+      - name: Fix permissions for jest
+        run: chmod +x ./node_modules/.bin/jest
+
+      # Додатковий крок (опціонально): конвертувати line endings з CRLF на LF
+      - name: Convert CRLF to LF for jest
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dos2unix
+          dos2unix ./node_modules/.bin/jest
 
       # (За потреби) Видалення CRLF:
       - name: Convert line endings in jest
