@@ -13,6 +13,8 @@ export async function fetchNetworkData(): Promise<NetworkInfo[]> {
     try {
       const response = await axios.get('https://api.blockcypher.com/v1/eth/main');
       const ethData: any = response.data; // Використовуємо any для спрощення типізації
+      const etherscanKey = process.env.ETHERSCAN_API_KEY || '';
+      const url = `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${etherscanKey}`;
 
       const networkData: NetworkInfo[] = [
         {
