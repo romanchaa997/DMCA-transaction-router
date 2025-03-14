@@ -7,23 +7,33 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      # Крок 2.1: Checkout коду
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'
+      # Крок 2.2: Налаштування Node.js (використовуємо версію 16, або можете змінити)
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
 
-    - name: Install dependencies
-      run: npm install
+      # Крок 2.3: Встановлення залежностей
+      - name: Install dependencies
+        run: npm install
 
-    - name: Set permissions for jest
-      run: chmod +x ./node_modules/.bin/jest
+      # Крок 2.4: Запуск тестів
+      - name: Run tests
+        run: npm run test
 
-    - name: Run tests
-      run: npm test
+      # (Опціонально) Крок 2.5: Автоматичний деплой на Heroku після успішних тестів
+      - name: Deploy to Heroku
+        if: github.ref == 'refs/heads/main'
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: "my-dmca"
+          heroku_email: "your-email@example.com"
