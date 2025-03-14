@@ -35,11 +35,7 @@ jobs:
           sudo apt-get install -y dos2unix
           dos2unix ./node_modules/.bin/jest
 
-      # (За потреби) Видалення CRLF:
-      - name: Convert line endings in jest
-        run: sudo apt-get install dos2unix && dos2unix node_modules/.bin/jest
- 
-        # Крок 2.4: Запуск тестів
+      # Крок 2.4: Запуск тестів
       - name: Run tests
         run: npm run test
 
@@ -50,4 +46,4 @@ jobs:
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: "my-dmca"
-          heroku_email: "your-email@example.com"
+          heroku_email: "rigoro13111997@gmail.com"
