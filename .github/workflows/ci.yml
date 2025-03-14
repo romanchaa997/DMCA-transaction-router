@@ -35,6 +35,10 @@ jobs:
           sudo apt-get install -y dos2unix
           dos2unix ./node_modules/.bin/jest
 
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
+        
       # Крок 2.4: Запуск тестів
       - name: Run tests
         run: npm run test
