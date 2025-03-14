@@ -25,7 +25,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # Крок 2.4: Запуск тестів
+      # (За потреби) Видалення CRLF:
+      - name: Convert line endings in jest
+        run: sudo apt-get install dos2unix && dos2unix node_modules/.bin/jest
+ 
+        # Крок 2.4: Запуск тестів
       - name: Run tests
         run: npm run test
 
