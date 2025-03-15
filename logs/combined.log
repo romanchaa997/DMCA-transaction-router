@@ -4,3 +4,5 @@
 2025-03-15 15:49:06 error: Помилка надсилання транзакції: Transaction failed: Error: insufficient funds (transaction={ "from": "0x406a3e99b5bcd74e5fb8f0ab283a256784ee0733", "nonce": "0x0", "to": "0x1234567890abcdef1234567890abcdef12345678", "value": "0x38d7ea4c68000" }, info={ "error": { "code": -32000, "message": "failed with 35964845 gas: insufficient funds for gas * price + value: address 0x406A3e99b5bcD74E5FB8F0aB283A256784Ee0733 have 0 want 1000000000000000" }, "payload": { "id": 6, "jsonrpc": "2.0", "method": "eth_estimateGas", "params": [ { "from": "0x406a3e99b5bcd74e5fb8f0ab283a256784ee0733", "nonce": "0x0", "to": "0x1234567890abcdef1234567890abcdef12345678", "value": "0x38d7ea4c68000" } ] } }, code=INSUFFICIENT_FUNDS, version=6.13.5)
 2025-03-15 15:49:41 info: Route processed: chosen network Solana
 2025-03-15 17:57:52 info: Server started on port 3000
+2025-03-15 19:21:27 info: Server started on port 3000
+2025-03-15 19:21:52 info: Route processed: chosen network Solana
