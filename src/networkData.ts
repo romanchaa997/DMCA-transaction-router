@@ -12,39 +12,60 @@ export interface NetworkInfo {
 export async function fetchNetworkData(): Promise<NetworkInfo[]> {
   if (process.env.USE_REAL_API === 'true') {
     try {
+      // --- Ethereum (Etherscan) ---
       const etherscanKey = process.env.ETHERSCAN_API_KEY || '';
-      // Запит до Etherscan Gas Oracle
       const ethResponse = await axios.get(
         `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${etherscanKey}`
       );
-      // Якщо запит успішний, отримуємо ProposeGasPrice (за потреби, можна додати додаткову обробку)
-      const gasFee = Number(ethResponse.data.result.ProposeGasPrice) || 100;
-      // Використовуємо орієнтовні значення для інших параметрів
-      const confirmationTime = 18;
-      const load = 80;
-      const averageBlockTime = 14;
-      const reliability = 98;
+      let ethGasFee = 100;
+      if (ethResponse.data.status === '1') {
+         ethGasFee = Number(ethResponse.data.result.ProposeGasPrice);
+      }
+
+      // --- Polygon (Polygonscan) ---
+      const polygonscanKey = process.env.POLYGONSCAN_API_KEY || '';
+      const polyResponse = await axios.get(
+        `https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey=${polygonscanKey}`
+      );
+      let polyGasFee = 2.5;
+      if (polyResponse.data.status === '1') {
+         polyGasFee = Number(polyResponse.data.result.ProposeGasPrice);
+      }
+
+      // --- BSC (BscScan) ---
+      const bscscanKey = process.env.BSCSCAN_API_KEY || '';
+      const bscResponse = await axios.get(
+        `https://api.bscscan.com/api?module=gastracker&action=gasoracle&apikey=${bscscanKey}`
+      );
+      let bscGasFee = 6;
+      if (bscResponse.data.status === '1') {
+         bscGasFee = Number(bscResponse.data.result.ProposeGasPrice);
+      }
+
+      // Оцінки для Avalanche та Solana (орієнтовні значення)
+      const avaxGasFee = 15;
+      const solanaGasFee = 0.001;
 
       const networkData: NetworkInfo[] = [
         {
           name: 'Ethereum',
-          gasFee,
-          confirmationTime,
-          load,
-          averageBlockTime,
-          reliability
+          gasFee: ethGasFee,
+          confirmationTime: 20,
+          load: 80,
+          averageBlockTime: 14,
+          reliability: 98
         },
         {
           name: 'Polygon',
-          gasFee: 2.5,
-          confirmationTime: 2,
+          gasFee: polyGasFee,
+          confirmationTime: 3,
           load: 25,
           averageBlockTime: 2.5,
           reliability: 95
         },
         {
           name: 'BSC',
-          gasFee: 6,
+          gasFee: bscGasFee,
           confirmationTime: 3,
           load: 45,
           averageBlockTime: 3,
@@ -52,7 +73,7 @@ export async function fetchNetworkData(): Promise<NetworkInfo[]> {
         },
         {
           name: 'Avalanche',
-          gasFee: 15,
+          gasFee: avaxGasFee,
           confirmationTime: 4,
           load: 55,
           averageBlockTime: 2,
@@ -60,7 +81,7 @@ export async function fetchNetworkData(): Promise<NetworkInfo[]> {
         },
         {
           name: 'Solana',
-          gasFee: 0.001,
+          gasFee: solanaGasFee,
           confirmationTime: 1,
           load: 30,
           averageBlockTime: 0.5,
@@ -69,11 +90,11 @@ export async function fetchNetworkData(): Promise<NetworkInfo[]> {
       ];
       return networkData;
     } catch (error) {
-      console.error('Помилка отримання даних з API:', error);
+      console.error('Error fetching real network data:', error);
     }
   }
 
-  // Якщо режим реального API не увімкнено або виникла помилка – повертаємо мок-дані
+  // Якщо USE_REAL_API не увімкнено – повертаємо мок-дані
   const mockData: NetworkInfo[] = [
     { name: 'Ethereum', gasFee: 100, confirmationTime: 15, load: 80, averageBlockTime: 14, reliability: 98 },
     { name: 'Polygon', gasFee: 2, confirmationTime: 2, load: 20, averageBlockTime: 2.5, reliability: 95 },

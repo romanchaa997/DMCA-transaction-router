@@ -1,65 +1,89 @@
 import 'dotenv/config';
-// ...
 import express, { Request, Response } from 'express';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import { validationResult } from 'express-validator';
+import logger from './logger/winstonLogger';
 import { routeTransaction, TransactionInput } from './transactionRouter';
-import { body, validationResult } from 'express-validator';
-import logger from './logger';
-
+import { sendTransaction } from './blockchain';
+import { routeValidators } from './validators/transactionValidators'; // Імпортуємо валідатори
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
+// Налаштування Helmet з розширеними налаштуваннями
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: []
+      }
+    },
+    frameguard: { action: 'deny' },
+    referrerPolicy: { policy: 'no-referrer' }
+  })
+);
+
+// Налаштування парсингу JSON і статичних файлів
 app.use(express.json());
-
-// app.get('/', (req, res) => {
-//   res.send('DMCA Transaction Router MVP');
-// });
-
 app.use(express.static('public'));
 
-// Обробник для POST /route з валідацією
+// Rate limiting - обмеження запитів
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 хвилин
+  max: 100, // максимум 100 запитів за 15 хвилин
+  message: 'Too many requests from this IP, please try again later'
+});
+app.use(limiter);
+
+// Маршрут /route з використанням валідаторів із файлу routeValidators
 app.post(
   '/route',
-  [
-    // Валідація поля sender (Ethereum-адреса)
-    body('sender')
-      .exists().withMessage('Поле sender обов’язкове.')
-      .isString().withMessage('Поле sender має бути рядком.')
-      .matches(/^0x[a-fA-F0-9]{40}$/).withMessage('Невірний формат адреси відправника.'),
-    // Валідація поля recipient (Ethereum-адреса)
-    body('recipient')
-      .exists().withMessage('Поле recipient обов’язкове.')
-      .isString().withMessage('Поле recipient має бути рядком.')
-      .matches(/^0x[a-fA-F0-9]{40}$/).withMessage('Невірний формат адреси отримувача.'),
-    // Валідація поля amount
-    body('amount')
-      .exists().withMessage('Поле amount обов’язкове.')
-      .isFloat({ gt: 0 }).withMessage('Сума має бути числом > 0.'),
-    // Валідація поля token
-    body('token')
-      .exists().withMessage('Поле token обов’язкове.')
-      .isString().withMessage('Поле token має бути рядком.')
-      .notEmpty().withMessage('Поле token не може бути порожнім.')
-  ],
-  async (req: Request, res: Response): Promise<void> => {
-    // Перевірка результатів валідації
+  routeValidators, // Використовуємо валідатори з файлу, які описані окремо
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.status(400).json({ errors: errors.array() });
-      return;
+      logger.warn(`Validation errors: ${JSON.stringify(errors.array())}`);
+      return res.status(400).json({ errors: errors.array() });
     }
-    
+
     const input: TransactionInput = req.body;
     try {
       const result = await routeTransaction(input);
+      logger.info(`Route processed: chosen network ${result.chosenNetwork.name}`);
       res.json(result);
     } catch (error) {
-      logger.error(`Помилка маршрутизації транзакції: ${error}`);
+      logger.error(`Помилка маршрутизації транзакції: ${(error as Error).message}`);
       res.status(500).json({ error: 'Помилка при маршрутизації транзакції' });
     }
   }
 );
-  
+
+// Маршрут /send для надсилання транзакцій
+app.post('/send', async (req: Request, res: Response) => {
+  try {
+    const { to, amount } = req.body;
+    const receipt = await sendTransaction(to, amount);
+    if (!receipt) {
+      logger.error('Transaction receipt is null');
+      return res.status(500).json({ error: 'Transaction receipt is null' });
+    }
+    const txHash = (receipt as any).transactionHash || (receipt as any).hash;
+    logger.info(`Transaction sent: ${txHash}`);
+    res.json({
+      message: 'Transaction sent!',
+      transactionHash: txHash,
+    });
+  } catch (error) {
+    logger.error(`Помилка надсилання транзакції: ${(error as Error).message}`);
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  logger.info(`Server started on port ${PORT}`);
 });
